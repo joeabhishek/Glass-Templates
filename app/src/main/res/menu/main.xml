@@ -5,6 +5,16 @@
         android:icon="@drawable/ic_stop"/>
 
     <item
+        android:id="@+id/action_live"
+        android:title="Live Score"
+        android:icon="@drawable/ic_glass_logo"/>
+
+    <item
+        android:id="@+id/action_speak"
+        android:title="Speak"
+        android:icon="@drawable/ic_glass_logo"/>
+
+    <item
         android:id="@+id/action_about"
         android:icon="@drawable/ic_glass_logo"
         android:title="@string/action_about"/>

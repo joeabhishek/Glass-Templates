@@ -60,7 +60,7 @@ public class LiveCardService extends Service {
 
             // Set up the live card's action with a pending intent
             // to show a activity_main when tapped
-            Intent menuIntent = new Intent(this, MainActivity.class);
+            Intent menuIntent = new Intent(this, LiveCardMenuActivity.class);
             menuIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK);
             mLiveCard.setAction(PendingIntent.getActivity(
@@ -124,7 +124,7 @@ public class LiveCardService extends Service {
                 mHandler.postDelayed(mUpdateLiveCardRunnable, DELAY_MILLIS);
                 count++;
             } else {
-                onDestroy();
+
             }
         }
 

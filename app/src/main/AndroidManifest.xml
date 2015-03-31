@@ -26,6 +26,11 @@
             android:name=".AboutActivity"
             android:label="@string/title_activity_about" >
         </activity>
+        <activity
+            android:name=".LiveCardMenuActivity"
+            android:label="@string/title_activity_live_card_menu" >
+        </activity>
+
 
         <service
             android:name=".LiveCardService"
@@ -41,11 +46,12 @@
                 android:resource="@xml/voice_trigger" />
         </service>
 
-        <receiver android:name="com.example.mojo.helloglass.MyReceiver" >
+        <receiver android:name=".MyReceiver" >
             <intent-filter>
                 <action android:name="com.hmkcode.android.USER_ACTION" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>
