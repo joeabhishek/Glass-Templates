@@ -19,8 +19,10 @@
     <string name="action_quit">Quit</string>
     <string name="action_live">Live Score</string>
     <string name="action_speak">Speak</string>
+    <string name="action_poke_phone">Poke Phone</string>
     <string name="title_activity_about">AboutActivity</string>
     <string name="title_activity_menu">MenuActivity</string>
     <string name="title_activity_live_card_menu">LiveCardMenu</string>
+    <string name="title_activity_bluetooth">BluetoothActivity</string>
 
 </resources>

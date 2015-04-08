@@ -13,10 +13,13 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import com.example.mojo.helloglass.adapter.MovieCardsAdapter;
+import com.example.mojo.helloglass.bluetooth.BluetoothActivity;
 import com.example.mojo.helloglass.model.MovieCard;
 import com.google.android.glass.app.Card;
 import com.google.android.glass.widget.CardBuilder;
 import com.google.android.glass.widget.CardScrollView;
+import com.google.glass.companion.CompanionMessagingUtil;
+import com.google.glass.companion.Proto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +175,15 @@ public class MainActivity extends Activity implements
                 // this is the service to create a live card
                 startService(new Intent(this, LiveCardService.class));
                 return true;
+            case R.id.action_poke_phone:
+                // this is the service to create a live card
+                /*try {
+                    pokePhone();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }*/
+                Intent intent = new Intent(this, BluetoothActivity.class);
+                this.startActivity(intent);
             case R.id.action_speak:
 //                Plays disallowed sound to indicate that TAP actions are not supported.
 //                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -192,6 +204,12 @@ public class MainActivity extends Activity implements
         }
     }
 
+    private void pokePhone() throws Exception {
+        Proto.Envelope envelope = CompanionMessagingUtil.newEnvelope();
+        envelope.serialNumber = 12408317;
+        JoeMessageUtil.send(envelope);
+    }
+
     @Override
     public void onInit(int status) {
 
@@ -203,7 +221,7 @@ public class MainActivity extends Activity implements
                     || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Log.e("TTS", "This Language is not supported");
             } else {
-                speakOut();
+
             }
 
         } else {
@@ -216,7 +234,7 @@ public class MainActivity extends Activity implements
 
         //String text = txtText.getText().toString();
 
-        tts.speak("Hello Joe", TextToSpeech.QUEUE_FLUSH, null);
+        tts.speak("Hello Bhonda", TextToSpeech.QUEUE_FLUSH, null);
     }
 
     @Override

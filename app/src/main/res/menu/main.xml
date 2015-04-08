@@ -1,5 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_poke_phone"
+        android:title="Poke Phone"
+        android:icon="@drawable/ic_glass_logo"/>
+
+    <item
         android:id="@+id/action_quit"
         android:title="Dismiss"
         android:icon="@drawable/ic_stop"/>
@@ -13,6 +18,7 @@
         android:id="@+id/action_speak"
         android:title="Speak"
         android:icon="@drawable/ic_glass_logo"/>
+
 
     <item
         android:id="@+id/action_about"
