@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements
 
 
         // Card with full background of 3 images
-        mc = new MovieCard("Dude? Dude? Focus dude... Dude?",
+        mc = new MovieCard("Fasten your seat belts, this is going to be one crazy project!!",
                 "Oh, he lives. Hey, dude!", Card.ImageLayout.FULL, new int[] {
                 R.drawable.card_bottom_left,
                 R.drawable.card_bottom_right, R.drawable.card_top });
@@ -305,6 +305,8 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onPause() {
+        // use stop message to disconnect from bluetooth socket
+        sendMessage(String.valueOf("STOP"));
         //mCardScroller.deactivate();
         mCardScrollView.deactivate();
         super.onPause();
@@ -321,6 +323,8 @@ public class MainActivity extends Activity implements
 
     @Override
     public void onDestroy() {
+        // use stop message to disconnect from bluetooth socket
+        sendMessage(String.valueOf("STOP"));
         // Don't forget to shutdown tts!
         if (tts != null) {
             tts.stop();
