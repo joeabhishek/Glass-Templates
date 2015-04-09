@@ -1,9 +1,13 @@
 package com.example.mojo.helloglass;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.Menu;
@@ -11,9 +15,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.example.mojo.helloglass.adapter.MovieCardsAdapter;
 import com.example.mojo.helloglass.bluetooth.BluetoothActivity;
+import com.example.mojo.helloglass.bluetooth.BluetoothChatService;
+import com.example.mojo.helloglass.bluetooth.Constants;
 import com.example.mojo.helloglass.model.MovieCard;
 import com.google.android.glass.app.Card;
 import com.google.android.glass.widget.CardBuilder;
@@ -24,6 +32,7 @@ import com.google.glass.companion.Proto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 
 /**
@@ -56,6 +65,46 @@ public class MainActivity extends Activity implements
     private Context context;
     private TextToSpeech tts;
 
+
+
+    /* Bluetooth Variable Declarations
+     */
+    private final static int REQUEST_ENABLE_BT = 1;
+    private static final String TAG = "BluetoothActivity";
+
+    /**
+     * Name of the connected device
+     */
+    private String mConnectedDeviceName = null;
+
+    /**
+     * Array adapter for the conversation thread
+     */
+    private ArrayAdapter<String> mConversationArrayAdapter;
+
+    /**
+     * String buffer for outgoing messages
+     */
+    private StringBuffer mOutStringBuffer;
+
+    /**
+     * Local Bluetooth adapter
+     */
+    private BluetoothAdapter mBluetoothAdapter = null;
+
+    /**
+     * Member object for the chat services
+     */
+    private BluetoothChatService mChatService = null;
+
+    private Activity mCurrentActivity = null;
+    public Activity getCurrentActivity(){
+        return mCurrentActivity;
+    }
+    public void setCurrentActivity(Activity mCurrentActivity){
+        this.mCurrentActivity = mCurrentActivity;
+    }
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -75,6 +124,10 @@ public class MainActivity extends Activity implements
 
         //Text to speech initialization
         tts = new TextToSpeech(this, this);
+
+        setCurrentActivity(this);
+
+        setupChat();
 
 
 //        mCardScroller.setAdapter(new CardScrollAdapter() {
@@ -105,10 +158,9 @@ public class MainActivity extends Activity implements
         mCardScrollView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                openOptionsMenu();
-//                Intent ia = new Intent(MainActivity.this, MenuActivity.class);
-//                startActivity(ia);
-
+                MovieCard movieCard = mCards.get(position);
+                speakOut(String.valueOf(movieCard.getText()));
+                sendMessage(String.valueOf(movieCard.getText()));
             }
         });
         //setContentView(mCardScroller);
@@ -188,7 +240,7 @@ public class MainActivity extends Activity implements
 //                Plays disallowed sound to indicate that TAP actions are not supported.
 //                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 //                am.playSoundEffect(Sounds.DISALLOWED);
-                speakOut();
+                speakOut("Hello Joe");
                 return true;
             case R.id.action_quit:
                 // Quit menu item selected
@@ -230,11 +282,11 @@ public class MainActivity extends Activity implements
 
     }
 
-    private void speakOut() {
+    private void speakOut(String text) {
 
         //String text = txtText.getText().toString();
 
-        tts.speak("Hello Bhonda", TextToSpeech.QUEUE_FLUSH, null);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     @Override
@@ -275,6 +327,111 @@ public class MainActivity extends Activity implements
             tts.shutdown();
         }
         super.onDestroy();
+    }
+
+    private void setupChat() {
+
+            Log.d(TAG, "setupChat()");
+            BluetoothDevice device = null;
+
+            Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getDefaultAdapter().getBondedDevices();
+            for (final BluetoothDevice d : bondedDevices) {
+                if (d.getName().contains("Nexus")) {
+
+                    Log.d("JOE", "Talking to " + d.getName());
+                    device = d;
+                }
+            }
+
+            // Initialize the BluetoothChatService to perform bluetooth connections
+            mChatService = new BluetoothChatService(this, mHandler);
+
+            mChatService.connect(device, false);
+
+            // Initialize the array adapter for the conversation thread
+            //mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
+
+            // Initialize the buffer for outgoing messages
+            mOutStringBuffer = new StringBuffer("");
+
+
+    }
+
+    /**
+     * The Handler that gets information back from the BluetoothChatService
+     */
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            //FragmentActivity activity = getActivity();
+            switch (msg.what) {
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case BluetoothChatService.STATE_CONNECTED:
+                            //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            //mConversationArrayAdapter.clear();
+                            break;
+                        case BluetoothChatService.STATE_CONNECTING:
+                            //setStatus(R.string.title_connecting);
+                            break;
+                        case BluetoothChatService.STATE_LISTEN:
+                        case BluetoothChatService.STATE_NONE:
+                            //setStatus(R.string.title_not_connected);
+                            break;
+                    }
+                    break;
+                case Constants.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // construct a string from the buffer
+                    String writeMessage = new String(writeBuf);
+                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    break;
+                case Constants.MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    // construct a string from the valid bytes in the buffer
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    break;
+                case Constants.MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
+                    if (null != this) {
+                        Toast.makeText(getCurrentActivity(), "Connected to "
+                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case Constants.MESSAGE_TOAST:
+                    if (null != getCurrentActivity()) {
+                        Toast.makeText(getCurrentActivity(), msg.getData().getString(Constants.TOAST),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }
+    };
+
+    /**
+     * Sends a message.
+     *
+     * @param message A string of text to send.
+     */
+    private void sendMessage(String message) {
+        // Check that we're actually connected before trying anything
+        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+            Toast.makeText(this, "Not Connected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check that there's actually something to send
+        if (message.length() > 0) {
+            // Get the message bytes and tell the BluetoothChatService to write
+            byte[] send = message.getBytes();
+            mChatService.write(send);
+
+            // Reset out string buffer to zero and clear the edit text field
+            mOutStringBuffer.setLength(0);
+            //mOutEditText.setText(mOutStringBuffer);
+        }
     }
 
 }
