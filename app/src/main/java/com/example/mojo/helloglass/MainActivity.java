@@ -159,7 +159,7 @@ public class MainActivity extends Activity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MovieCard movieCard = mCards.get(position);
-                speakOut(String.valueOf(movieCard.getText()));
+                //speakOut(String.valueOf(movieCard.getText()));
                 sendMessage(String.valueOf(movieCard.getText()));
             }
         });
@@ -323,8 +323,6 @@ public class MainActivity extends Activity implements
 
     @Override
     public void onDestroy() {
-        // use stop message to disconnect from bluetooth socket
-        sendMessage(String.valueOf("STOP"));
         // Don't forget to shutdown tts!
         if (tts != null) {
             tts.stop();
