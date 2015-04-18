@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.example.mojo.helloglass.adapter.MovieCardsAdapter;
-import com.example.mojo.helloglass.bluetooth.BluetoothActivity;
 import com.example.mojo.helloglass.bluetooth.BluetoothChatService;
 import com.example.mojo.helloglass.bluetooth.Constants;
 import com.example.mojo.helloglass.model.MovieCard;
@@ -64,6 +62,12 @@ public class MainActivity extends Activity implements
     private CardScrollView mCardScrollView;
     private Context context;
     private TextToSpeech tts;
+
+    //Variable to set context
+
+    final String HOME = "HOME";
+    final String OFFICE = "OFFICE";
+    private String messageContext = HOME;
 
 
 
@@ -114,7 +118,8 @@ public class MainActivity extends Activity implements
 
         //This is the movie cards implementation
         context = this;
-        prepareMovieCards();
+        prepareHomeCards();
+
 
         mCardScrollView =  new CardScrollView(this);
         MovieCardsAdapter adapter = new MovieCardsAdapter(context, mCards);
@@ -160,7 +165,12 @@ public class MainActivity extends Activity implements
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MovieCard movieCard = mCards.get(position);
                 //speakOut(String.valueOf(movieCard.getText()));
-                sendMessage(String.valueOf(movieCard.getText()));
+
+                if(position == 0){
+                    openOptionsMenu();
+                } else {
+                    sendMessage(String.valueOf(movieCard.getText()));
+                }
             }
         });
         //setContentView(mCardScroller);
@@ -168,34 +178,91 @@ public class MainActivity extends Activity implements
 
     }
 
-    private void prepareMovieCards() {
+    private void prepareOfficeCards() {
         mCards = new ArrayList<MovieCard>();
 
-        // Card with full background image
-        MovieCard mc = new MovieCard("I wanna go home. Does anyone know where my dad is?",
-                "Pet store?", Card.ImageLayout.FULL,
-                new int[] { R.drawable.card_full });
+        MovieCard mc = new MovieCard("Select Context",
+                "Options", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
         mCards.add(mc);
+
         // Card with no background image
-        mc = new MovieCard("I don't know. But who cares! Ha ha!",
-                "Wait! What does that mean?", Card.ImageLayout.FULL, new int[] {});
+        //Providing
+        mc = new MovieCard("Thank You So Much!!",
+                "Concern", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
+
+        // Card with no background image
+        mc = new MovieCard("In a meeting, will call you back.",
+                "Meeting", Card.ImageLayout.FULL, new int[] {});
         mCards.add(mc);
 
 
         // Card with full background of 3 images
-        mc = new MovieCard("Fasten your seat belts, this is going to be one crazy project!!",
-                "Oh, he lives. Hey, dude!", Card.ImageLayout.FULL, new int[] {
+        mc = new MovieCard("Don’t forget to lock the door.",
+                "Important Reminder", Card.ImageLayout.FULL, new int[] {
                 R.drawable.card_bottom_left,
                 R.drawable.card_bottom_right, R.drawable.card_top });
         mCards.add(mc);
 
         // Card with left aligned images
-        mc = new MovieCard("Just keep swimming.",
-                "I'm sorry, Dory. But I... do", Card.ImageLayout.LEFT, new int[] {
+        mc = new MovieCard("Did you reach?",
+                "Concern", Card.ImageLayout.LEFT, new int[] {
                 R.drawable.card_bottom_left,
                 R.drawable.card_bottom_right, R.drawable.card_top });
         mCards.add(mc);
 
+        mc = new MovieCard("Okay",
+                "Acknowledgement", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
+    }
+
+    private void prepareHomeCards() {
+        mCards = new ArrayList<MovieCard>();
+
+
+        MovieCard mc = new MovieCard("Select Context",
+                "Options", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
+
+        // Card with full background image
+        mc = new MovieCard("Do not forget the groceries :)",
+                "Reminder", Card.ImageLayout.FULL,
+                new int[] { R.drawable.card_full });
+        mCards.add(mc);
+
+        // Card with no background image
+        mc = new MovieCard("Where are you?",
+                "Concern", Card.ImageLayout.FULL, new int[] {});
+        mCards.add(mc);
+
+
+        // Card with full background of 3 images
+        mc = new MovieCard("Don’t forget to lock the door.",
+                "Important Reminder", Card.ImageLayout.FULL, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
+
+        // Card with left aligned images
+        mc = new MovieCard("What time will you be coming back today??",
+                "Information Request", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
+
+        mc = new MovieCard("Okay",
+                "Acknowledgement", Card.ImageLayout.LEFT, new int[] {
+                R.drawable.card_bottom_left,
+                R.drawable.card_bottom_right, R.drawable.card_top });
+        mCards.add(mc);
     }
 
 
@@ -214,9 +281,9 @@ public class MainActivity extends Activity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        MovieCardsAdapter adapter = null;
         switch (item.getItemId()) {
-            case R.id.action_about:
+            /*case R.id.action_about:
                 // About menu item selected
                 Intent ia = new Intent(MainActivity.this, AboutActivity.class);
                 startActivity(ia);
@@ -229,11 +296,11 @@ public class MainActivity extends Activity implements
                 return true;
             case R.id.action_poke_phone:
                 // this is the service to create a live card
-                /*try {
+                *//*try {
                     pokePhone();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }*/
+                }*//*
                 Intent intent = new Intent(this, BluetoothActivity.class);
                 this.startActivity(intent);
             case R.id.action_speak:
@@ -250,6 +317,28 @@ public class MainActivity extends Activity implements
                 liveCardService.stopSelf();
                 finish();
                 this.finishAffinity();
+                return true;*/
+            case R.id.action_home:
+                messageContext = HOME;
+                prepareHomeCards();
+                adapter = new MovieCardsAdapter(context, mCards);
+                mCardScrollView.setAdapter(adapter);
+                mCardScrollView.activate();
+//                Intent home_intent = new Intent(this, MainActivity.class);
+//                home_intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(home_intent);
+//                finish();
+                return true;
+            case R.id.action_office:
+                messageContext = OFFICE;
+                prepareOfficeCards();
+                adapter = new MovieCardsAdapter(context, mCards);
+                mCardScrollView.setAdapter(adapter);
+                mCardScrollView.activate();
+//                Intent office_intent = new Intent(this, MainActivity.class);
+//                office_intent.setFlags((Intent.FLAG_ACTIVITY_CLEAR_TOP));
+//                startActivity(office_intent);
+//                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

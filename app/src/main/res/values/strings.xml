@@ -24,5 +24,8 @@
     <string name="title_activity_menu">MenuActivity</string>
     <string name="title_activity_live_card_menu">LiveCardMenu</string>
     <string name="title_activity_bluetooth">BluetoothActivity</string>
+    <string name="action_home">Home</string>
+    <string name="action_office">Office</string>
+    <string name="title_activity_office">OfficeActivity</string>
 
 </resources>
