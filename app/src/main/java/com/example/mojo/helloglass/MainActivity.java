@@ -132,7 +132,7 @@ public class MainActivity extends Activity implements
 
         setCurrentActivity(this);
 
-        setupChat();
+        //setupChat();
 
 
 //        mCardScroller.setAdapter(new CardScrollAdapter() {
@@ -324,10 +324,6 @@ public class MainActivity extends Activity implements
                 adapter = new MovieCardsAdapter(context, mCards);
                 mCardScrollView.setAdapter(adapter);
                 mCardScrollView.activate();
-//                Intent home_intent = new Intent(this, MainActivity.class);
-//                home_intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(home_intent);
-//                finish();
                 return true;
             case R.id.action_office:
                 messageContext = OFFICE;
@@ -335,10 +331,6 @@ public class MainActivity extends Activity implements
                 adapter = new MovieCardsAdapter(context, mCards);
                 mCardScrollView.setAdapter(adapter);
                 mCardScrollView.activate();
-//                Intent office_intent = new Intent(this, MainActivity.class);
-//                office_intent.setFlags((Intent.FLAG_ACTIVITY_CLEAR_TOP));
-//                startActivity(office_intent);
-//                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -389,6 +381,9 @@ public class MainActivity extends Activity implements
     protected void onResume() {
         super.onResume();
         //mCardScroller.activate();
+        //Setting up chat directly onResume and not onCreate because Resume is always called on
+        //on opening the chat. This way glass chat connects even when the screen is timed out.
+        setupChat();
         mCardScrollView.activate();
     }
 
