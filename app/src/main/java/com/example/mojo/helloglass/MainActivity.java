@@ -169,8 +169,9 @@ public class MainActivity extends Activity implements
                 if(position == 0){
                     openOptionsMenu();
                 } else {
-                    sendMessage(String.valueOf(movieCard.getText()));
+                    sendMessage(String.valueOf(movieCard.getMessage()));
                 }
+                switchCards(movieCard, position);
             }
         });
         //setContentView(mCardScroller);
@@ -178,16 +179,58 @@ public class MainActivity extends Activity implements
 
     }
 
+    private void switchCards(MovieCard movieCard, int position) {
+        int image_id = 0;
+        switch(messageContext){
+            case HOME:
+                if(position == 1) {
+                    image_id = R.drawable.home_card1_green;
+                    break;
+                } else if(position == 2){
+                    image_id = R.drawable.home_card2_green;
+                    break;
+                }
+            case OFFICE:
+                if(position == 1) {
+                    image_id = R.drawable.office_card1_green;
+                    break;
+                } else if(position == 2){
+                    image_id = R.drawable.office_card2_green;
+                    break;
+                }
+        }
+
+        movieCard.setImages(new int[] {image_id});
+        MovieCardsAdapter adapter = new MovieCardsAdapter(context, mCards);
+        mCardScrollView.deactivate();
+        mCardScrollView.setAdapter(adapter);
+        mCardScrollView.activate();
+    }
+
     private void prepareOfficeCards() {
         mCards = new ArrayList<MovieCard>();
 
-        MovieCard mc = new MovieCard("Select Context",
-                "Options", Card.ImageLayout.LEFT, new int[] {
-                R.drawable.card_bottom_left,
-                R.drawable.card_bottom_right, R.drawable.card_top });
+        MovieCard mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.select_context });
         mCards.add(mc);
 
-        // Card with no background image
+
+        // Card with full background image
+        mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.office_card1_blue });
+        mc.setMessage("In a meeting, will call you back");
+        mCards.add(mc);
+
+        mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.office_card2_blue });
+        mc.setMessage("In a meeting, what happened?");;
+        mCards.add(mc);
+
+
+/*        // Card with no background image
         //Providing
         mc = new MovieCard("Thank You So Much!!",
                 "Concern", Card.ImageLayout.LEFT, new int[] {
@@ -219,20 +262,32 @@ public class MainActivity extends Activity implements
                 "Acknowledgement", Card.ImageLayout.LEFT, new int[] {
                 R.drawable.card_bottom_left,
                 R.drawable.card_bottom_right, R.drawable.card_top });
-        mCards.add(mc);
+        mCards.add(mc);*/
     }
 
     private void prepareHomeCards() {
         mCards = new ArrayList<MovieCard>();
 
 
-        MovieCard mc = new MovieCard("Select Context",
-                "Options", Card.ImageLayout.LEFT, new int[] {
-                R.drawable.card_bottom_left,
-                R.drawable.card_bottom_right, R.drawable.card_top });
+        MovieCard mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.select_context });
         mCards.add(mc);
 
         // Card with full background image
+        mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.home_card1_blue});
+        mc.setMessage("Don't forget to buy groceries.");
+        mCards.add(mc);
+
+        mc = new MovieCard("",
+                "", Card.ImageLayout.FULL,
+                new int[] { R.drawable.home_card2_blue});
+        mc.setMessage("What do you want for dinner?");
+        mCards.add(mc);
+
+/*        // Card with full background image
         mc = new MovieCard("Do not forget the groceries :)",
                 "Reminder", Card.ImageLayout.FULL,
                 new int[] { R.drawable.card_full });
@@ -262,7 +317,7 @@ public class MainActivity extends Activity implements
                 "Acknowledgement", Card.ImageLayout.LEFT, new int[] {
                 R.drawable.card_bottom_left,
                 R.drawable.card_bottom_right, R.drawable.card_top });
-        mCards.add(mc);
+        mCards.add(mc);*/
     }
 
 
@@ -324,6 +379,7 @@ public class MainActivity extends Activity implements
                 adapter = new MovieCardsAdapter(context, mCards);
                 mCardScrollView.setAdapter(adapter);
                 mCardScrollView.activate();
+                mCardScrollView.animate(1, CardScrollView.Animation.NAVIGATION);
                 return true;
             case R.id.action_office:
                 messageContext = OFFICE;
@@ -331,6 +387,7 @@ public class MainActivity extends Activity implements
                 adapter = new MovieCardsAdapter(context, mCards);
                 mCardScrollView.setAdapter(adapter);
                 mCardScrollView.activate();
+                mCardScrollView.animate(1, CardScrollView.Animation.NAVIGATION);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -415,6 +472,18 @@ public class MainActivity extends Activity implements
         super.onDestroy();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putString("context", messageContext);
+        super.onSaveInstanceState(savedInstanceState);
+        // etc.
+    }
+
+
     private void setupChat() {
 
             Log.d(TAG, "setupChat()");
@@ -476,6 +545,7 @@ public class MainActivity extends Activity implements
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
+                    showToast(readMessage);
                     //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
@@ -495,6 +565,11 @@ public class MainActivity extends Activity implements
             }
         }
     };
+
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
     /**
      * Sends a message.

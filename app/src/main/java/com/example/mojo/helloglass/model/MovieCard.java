@@ -10,6 +10,7 @@ import com.google.android.glass.app.Card.ImageLayout;
 public class MovieCard {
 
     private String text;
+    private String message;
     private String footerText;
     private ImageLayout imgLayout;
     private int[] images;
@@ -31,6 +32,14 @@ public class MovieCard {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getFooterText() {

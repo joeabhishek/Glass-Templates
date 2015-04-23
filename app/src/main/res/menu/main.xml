@@ -28,11 +28,11 @@
 
     <item
         android:id="@+id/action_home"
-        android:icon="@drawable/ic_glass_logo"
+        android:icon="@drawable/home_icon"
         android:title="@string/action_home"/>
 
     <item
         android:id="@+id/action_office"
-        android:icon="@drawable/ic_glass_logo"
+        android:icon="@drawable/office_ico"
         android:title="@string/action_office"/>
 </menu>
